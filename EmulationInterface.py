@@ -12,12 +12,13 @@ def initialize():
     file = open(r'nesgym-pipe-out', 'w', buffering=1)
     filein = open(r'nesgym-pipe-in', 'rb', buffering=0)
 
-initialize()
+
 
 def envreset():
     global file
     global filein
     global framenum
+    global stock
     framenum = 0
     file.write("reset")
 
@@ -28,6 +29,7 @@ def envreset():
         if pipe_content !=  b"":
             pipe_data = pipe_content.decode('utf-8').split(',')
             state = [int(pipe_data[0]),int(pipe_data[1]),int(pipe_data[2]),int(pipe_data[3]),int(pipe_data[4]),int(pipe_data[5]),int(pipe_data[6]),int(pipe_data[7]),int(pipe_data[8]),int(pipe_data[9])]
+            stock = state[9]
             return state
 
 def envstep(action):

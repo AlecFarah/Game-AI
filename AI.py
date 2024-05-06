@@ -3,6 +3,7 @@ import math
 import random
 import matplotlib
 import matplotlib.pyplot as plt
+import EmulationInterface
 from collections import namedtuple, deque
 from itertools import count
 
@@ -10,6 +11,8 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
+
+EmulationInterface.initialize()
 
 
 env = gym.make("CartPole-v1")
@@ -72,9 +75,9 @@ TAU = 0.005
 LR = 1e-4
 
 # Get number of actions from gym action space
-n_actions = env.action_space.n
+n_actions = 12
 # Get the number of state observations
-state, info = env.reset()
+state = EmulationInterface.envreset()
 n_observations = len(state)
 
 policy_net = DQN(n_observations, n_actions).to(device)
@@ -178,11 +181,11 @@ else:
 
 for i_episode in range(num_episodes):
     # Initialize the environment and get its state
-    state, info = env.reset()
+    state = EmulationInterface.envreset()
     state = torch.tensor(state, dtype=torch.float32, device=device).unsqueeze(0)
     for t in count():
         action = select_action(state)
-        observation, reward, terminated, truncated = env.step(action.item())
+        observation, reward, terminated, truncated = EmulationInterface.envstep(action.item())
         reward = torch.tensor([reward], device=device)
         done = terminated or truncated
 
