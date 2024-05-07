@@ -21,6 +21,8 @@ def envreset():
     global stock
     global percent
     global total_reward
+    global stocks_taken
+
     total_reward = 0
     percent = 0
     framenum = 0
@@ -43,11 +45,13 @@ def envstep(action):
     global stock
     global percent
     global total_reward
+    global stocks_taken
 
     framenum += 1
     actions = ['U', 'D', 'L', 'R',
         'UR', 'DR', 'URA', 'DRB',
-        'A', 'B', 'RB', 'RA']
+        'A', 'B', 'RB', 'RA','UL', 'DL', 'ULA', 'DLB',
+        'LB', 'LA']
 
     file.write("joypad"+ '|' + actions[action])
 
@@ -59,24 +63,32 @@ def envstep(action):
             pipe_data = pipe_content.decode('utf-8').split(',')
             state = [int(pipe_data[0]),int(pipe_data[1]),int(pipe_data[2]),int(pipe_data[3]),int(pipe_data[4]),int(pipe_data[5]),int(pipe_data[6]),int(pipe_data[7]),int(pipe_data[8]),int(pipe_data[9])]
             break
-
-    reward = .001
+    percent = state[7]
+    stock = state[9]
+    reward = .00015
     if state[0] == 2:
         print("player 1 lost")
         print(f"the total reward was {total_reward}")
     if state[1] == 2:
         print("player 2 lost")
-    if stock != state[9]:
-        reward = .5
+    if stock == 4:
+        reward += .015
+    if stock == 3:
+        reward += .11
+    if stock == 2:
+        reward += .55
+    if stock == 1:
+        reward += .85
+    if stock == 0:
+        reward = 1
     if state[1] ==2:
         reward = 1
-    if percent < state[7]:
-        reward = .05
-    percent = state[7]
-    stock = state[9]
-    end = False
-    if stock < state[8]:
+    if state[3] < 80:
         reward = 0
+
+
+    end = False
+
 
     if state[0] == 2  or state[1] == 2:
         end = True

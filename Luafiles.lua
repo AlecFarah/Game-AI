@@ -30,8 +30,8 @@ end
 
 -- called once when emulator starts
 function nes_init()
-    emu.speedmode("maximum")
---emu.speedmode("normal")
+    --emu.speedmode("maximum")
+emu.speedmode("normal")
 
   pipe_prefix = 'nesgym-pipe'
   -- from emulator to client
