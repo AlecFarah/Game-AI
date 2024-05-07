@@ -1,5 +1,6 @@
 import time
 import subprocess
+from torch.utils.tensorboard import SummaryWriter
 
 def initialize():
     open(r'nesgym-pipe-out', 'w').close()
@@ -7,13 +8,18 @@ def initialize():
     global proc
     global file
     global filein
+    global writer
+    writer = SummaryWriter()
     args = [r'C:\Users\Alec\Downloads\fceux-2.6.6-win64\fceux64.exe', '-lua', "Luafiles.lua", "Game.nes"]
     proc = subprocess.Popen(' '.join(args))
     file = open(r'nesgym-pipe-out', 'w', buffering=1)
     filein = open(r'nesgym-pipe-in', 'rb', buffering=0)
 
 
-
+games = 0
+framenum = 0
+total_reward = 0
+stocks_taken=0
 def envreset():
     global file
     global filein
@@ -22,7 +28,13 @@ def envreset():
     global percent
     global total_reward
     global stocks_taken
+    global games
+    games += 1
 
+    writer.add_scalar("Length", framenum, games)
+    writer.add_scalar("Reward", total_reward, games)
+    writer.add_scalar("Stocks", stocks_taken, games)
+    writer.flush()
     total_reward = 0
     percent = 0
     framenum = 0
@@ -39,6 +51,7 @@ def envreset():
             return state
 
 def envstep(action):
+
     global file
     global filein
     global framenum
@@ -71,6 +84,7 @@ def envstep(action):
         print(f"the total reward was {total_reward}")
     if state[1] == 2:
         print("player 2 lost")
+        stock = -1
     if stock == 4:
         reward += .015
     if stock == 3:
@@ -85,7 +99,7 @@ def envstep(action):
         reward = 1
     if state[3] < 80:
         reward = 0
-
+    stocks_taken = stock
 
     end = False
 
