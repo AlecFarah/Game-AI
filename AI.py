@@ -6,15 +6,15 @@ import matplotlib.pyplot as plt
 import EmulationInterface
 from collections import namedtuple, deque
 from itertools import count
-
 import torch
 import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
 
+#initializes the emulator at savestate creating the environment
 EmulationInterface.initialize()
 
-
+#Makes environment
 env = gym.make("CartPole-v1")
 
 
@@ -24,7 +24,7 @@ plt.ion()
 
 # if GPU is to be used
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
+print(device)
 Transition = namedtuple('Transition',
                         ('state', 'action', 'next_state', 'reward'))
 
@@ -48,9 +48,9 @@ class DQN(nn.Module):
 
     def __init__(self, n_observations, n_actions):
         super(DQN, self).__init__()
-        self.layer1 = nn.Linear(n_observations, 128)
-        self.layer2 = nn.Linear(128, 128)
-        self.layer3 = nn.Linear(128, n_actions)
+        self.layer1 = nn.Linear(n_observations, 254)
+        self.layer2 = nn.Linear(254, 254)
+        self.layer3 = nn.Linear(254, n_actions)
 
     # Called with either one element to determine next action, or a batch
     # during optimization. Returns tensor([[left0exp,right0exp]...]).
@@ -66,7 +66,7 @@ class DQN(nn.Module):
 # EPS_DECAY controls the rate of exponential decay of epsilon, higher means a slower decay
 # TAU is the update rate of the target network
 # LR is the learning rate of the ``AdamW`` optimizer
-BATCH_SIZE = 128
+BATCH_SIZE = 254
 GAMMA = 0.99
 EPS_START = 0.9
 EPS_END = 0.05
@@ -104,7 +104,7 @@ def select_action(state):
             # found, so we pick action with the larger expected reward.
             return policy_net(state).max(1).indices.view(1, 1)
     else:
-        return torch.tensor([[env.action_space.sample()]], device=device, dtype=torch.long)
+        return torch.tensor([[random.randint(0,11)]], device=device, dtype=torch.long)
 
 
 episode_durations = []
@@ -175,9 +175,9 @@ def optimize_model():
     torch.nn.utils.clip_grad_value_(policy_net.parameters(), 100)
     optimizer.step()
 if torch.cuda.is_available():
-    num_episodes = 600
+    num_episodes = 40
 else:
-    num_episodes = 600
+    num_episodes = 50
 
 for i_episode in range(num_episodes):
     # Initialize the environment and get its state

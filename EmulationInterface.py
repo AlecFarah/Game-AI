@@ -19,6 +19,10 @@ def envreset():
     global filein
     global framenum
     global stock
+    global percent
+    global total_reward
+    total_reward = 0
+    percent = 0
     framenum = 0
     file.write("reset")
 
@@ -38,6 +42,7 @@ def envstep(action):
     global framenum
     global stock
     global percent
+    global total_reward
 
     framenum += 1
     actions = ['U', 'D', 'L', 'R',
@@ -55,18 +60,32 @@ def envstep(action):
             state = [int(pipe_data[0]),int(pipe_data[1]),int(pipe_data[2]),int(pipe_data[3]),int(pipe_data[4]),int(pipe_data[5]),int(pipe_data[6]),int(pipe_data[7]),int(pipe_data[8]),int(pipe_data[9])]
             break
 
-    reward = .1
+    reward = .001
     if state[0] == 2:
         print("player 1 lost")
+        print(f"the total reward was {total_reward}")
     if state[1] == 2:
         print("player 2 lost")
     if stock != state[9]:
-        reward = 1
+        reward = .5
     if state[1] ==2:
         reward = 1
+    if percent < state[7]:
+        reward = .05
+    percent = state[7]
     stock = state[9]
     end = False
+    if stock < state[8]:
+        reward = 0
+
     if state[0] == 2  or state[1] == 2:
         end = True
-    return state, reward, end, False
+    timeout = False
+
+    if framenum == 3600:
+        timeout == True
+
+    total_reward += reward
+
+    return state, reward, end, timeout
 
