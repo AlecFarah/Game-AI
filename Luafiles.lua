@@ -1,4 +1,6 @@
-
+--[[
+Handles inputs as well as outputs from emulator and helps it to communicate with the AI. Creates pipes. Holds functions
+that loads save states, sets the speed of the game, reads the relevant data for every frame and sends it to the AI, takes input from the AI and executes it in the emulator.--]]
 pipe_out = nil -- for sending data(output e.g. screen pixels, reward) back to client
 pipe_in = nil -- for getting data(input e.g. controller status change) from client
 flag_reset = false -- indicates whether a reset is happening
@@ -32,6 +34,7 @@ end
 function nes_init()
     --emu.speedmode("maximum")
 emu.speedmode("normal")
+-- controls speed of the emulator
 
   pipe_prefix = 'nesgym-pipe'
   -- from emulator to client
@@ -48,7 +51,7 @@ function nes_update_screen()
     write_to_pipe(memory.readbyte(0x0000)..","..memory.readbyte(0x0001)..","..memory.readbyte(0x0004)..","..memory.readbyte(0x0006)..","..memory.readbyte(0x0005)..","..memory.readbyte(0x0007)..","..memory.readbyte(0x002C)..","..memory.readbyte(0x002D)..","..memory.readbyte(0x0044)..","..memory.readbyte(0x0045))
 end
 
-
+-- If pipe is not open returns false if pipe is open returns true
 function nes_process_command()
   if not pipe_in then
     return false
@@ -63,7 +66,7 @@ function nes_process_command()
 
   return false
 end
-
+-- requests AI to input a command
 function nes_ask_for_command()
   write_to_pipe("wait_for_command" .. SEP .. emu.framecount())
 end
@@ -100,13 +103,13 @@ function write_to_pipe(data)
     pipe_out:flush()
   end
 end
-
+-- writes to the pipe without flushing
 function write_to_pipe_partial(data)
   if data and pipe_out then
     pipe_out:write(data)
   end
 end
-
+-- prepares data in pipe to be sent and then sends it
 function write_to_pipe_end()
   if pipe_out then
     pipe_out:write(SEP .. "\n")

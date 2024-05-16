@@ -11,6 +11,10 @@ import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
 
+''' This is what the AI uses to learn and develop as it gains data. Analyzes this data using tensors and layers to make a neural network. 
+Based off data chooses the appropriate input.'''
+
+
 #initializes the emulator at savestate creating the environment
 EmulationInterface.initialize()
 

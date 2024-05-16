@@ -2,6 +2,9 @@ import time
 import subprocess
 from torch.utils.tensorboard import SummaryWriter
 
+'''Creates graqphs with data associated to the AI's success. Pipes data from the AI to the game and
+ also allows the AI to see data from the emulator. Holds functions which start the training process, resets the environment
+ and pushes the AI to the next frame of the environment'''
 def initialize():
     open(r'nesgym-pipe-out', 'w').close()
     open(r'nesgym-pipe-in', 'w').close()
@@ -20,7 +23,9 @@ games = 0
 framenum = 0
 total_reward = 0
 stocks_taken=0
+
 def envreset():
+    #increases the game count by one, tells the emulator to reset, writes data like length, reward and stocks to the tensor board and resets culmulative reward, percent and framenumber to zero
     global file
     global filein
     global framenum
@@ -51,7 +56,7 @@ def envreset():
             return state
 
 def envstep(action):
-
+    #tells the AI do a new input for every new frame of the game and also controls what reward is given for the frame
     global file
     global filein
     global framenum
@@ -82,18 +87,18 @@ def envstep(action):
     if state[0] == 2:
         print("player 1 lost")
         print(f"the total reward was {total_reward}")
-    if state[1] == 2:
+    elif state[1] == 2:
         print("player 2 lost")
         stock = -1
     if stock == 4:
         reward += .015
-    if stock == 3:
+    elif stock == 3:
         reward += .11
-    if stock == 2:
+    elif stock == 2:
         reward += .55
-    if stock == 1:
+    elif stock == 1:
         reward += .85
-    if stock == 0:
+    elif stock == 0:
         reward = 1
     if state[1] ==2:
         reward = 1
